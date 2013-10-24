@@ -32,7 +32,7 @@ namespace DockChat
         public SplitPage()
         {
             this.InitializeComponent();
-            DisplayGroups();
+            //DisplayGroups();
         }
 
         private async void DisplayGroups()

@@ -31,7 +31,6 @@ namespace DockChat
     public sealed partial class ItemsPage : DockChat.Common.LayoutAwarePage
     {
 
-        public List<Group> UserGroups { get; set; }
         public string CurrentGroupId { get; set; }
         public List<Message> CurrentGroupMessages { get; set; }
 
@@ -54,11 +53,9 @@ namespace DockChat
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             // var sampleDataGroups = SampleDataSource.GetGroups((String)navigationParameter);
 
-            Task<JArray> userGroupsTask = GetGroups();
+            User.CurrentUser.Groups = await Group.GetGroups();
 
-            UserGroups = GetGroupsFromJson(await userGroupsTask);
-
-            foreach (Group group in UserGroups)
+            foreach (Group group in User.CurrentUser.Groups)
             {
                 ListBoxItem lbi = new ListBoxItem()
                 {
@@ -85,172 +82,49 @@ namespace DockChat
             this.Frame.Navigate(typeof(SplitPage), groupId);
         }
 
-        private async Task<JArray> GetGroups()
-        {
-            HttpWebRequest request =
-                WebRequest.Create(GroupMeSettings.BaseGroupMeUrl + "/groups?token=" + GroupMeSettings.AccessToken) as HttpWebRequest;
-            request.Method = "GET";
-            request.ContentType = "application/json; charset=utf-8";
-
-            HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-
-            string responseString;
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-                responseString = reader.ReadToEnd();
-            }
-
-            JObject responseObject = JObject.Parse(responseString);
-            JArray userGroupsArray = (JArray)responseObject["response"];
-            return userGroupsArray;
-        }
-
-        private List<Group> GetGroupsFromJson(JArray groupsArray)
-        {
-            List<Group> groupList = new List<Group>();
-            foreach (JObject jsonObject in groupsArray)
-            {
-                List<Member> membersList = new List<Member>();
-                JArray membersArray = (JArray)jsonObject["members"];
-                foreach (JObject member in membersArray)
-                {
-                    Member newMember = new Member()
-                    {
-                        Id = (string) member["id"],
-                        UserId = (string) member["user_id"],
-                        Nickname = (string) member["nickname"],
-                        Muted = (bool) member["muted"],
-                        ImageUrl = (string) member["image_url"],
-                        Autokicked = (bool) member["autokicked"]
-                    };
-                    membersList.Add(newMember);
-                }
-                Group newGroup = new Group()
-                {
-                    Id = (string) jsonObject["id"],
-                    GroupId = (string) jsonObject["group_id"],
-                    Name = (string) jsonObject["name"],
-                    PhoneNumber = (string) jsonObject["phone_number"],
-                    PrivacyType = ((string) jsonObject["type"] == "private") ? Group.GroupType.Private : Group.GroupType.Public,
-                    Description = (string) jsonObject["description"],
-                    ImageUrl = (string) jsonObject["image_url"],
-                    CreatorUserId = (string) jsonObject["creator_user_id"],
-                    CreatedAt = (long) jsonObject["created_at"],
-                    UpdatedAt = (long) jsonObject["updated_at"],
-                    OfficeMode = (bool) jsonObject["office_mode"],
-                    ShareUrl = (string) jsonObject["share_url"],
-                    Members = membersList
-                };
-
-                groupList.Add(newGroup);
-            }
-
-            return groupList;
-        }
-
         private void GroupListBoxItem_Clicked(object sender, RoutedEventArgs e)
         {
-            string groupdId = (sender as ListBoxItem).Name;
-            CurrentGroupId = groupdId;
-            GetGroupMessages(groupdId);
+            string groupId = (sender as ListBoxItem).Name;
+            GetAndDisplayGroupMessages(groupId);
         }
 
-        private async void GetGroupMessages(string groupId)
+        private async void GetAndDisplayGroupMessages(string groupId)
         {
-            HttpWebRequest request =
-                WebRequest.Create(GroupMeSettings.BaseGroupMeUrl + "/groups/" + groupId + "/messages?token=" + GroupMeSettings.AccessToken) as HttpWebRequest;
-            request.Method = "GET";
-            request.ContentType = "application/json; charset=utf-8";
+            CurrentGroupId = groupId;
+            await GetGroupMessages(groupId);
+            ShowMessages(groupId);
+        }
 
-            HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-
-            string responseString;
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-                responseString = reader.ReadToEnd();
-            }
-
-            JObject responseObject = JObject.Parse(responseString);
-            JArray messagesArray = (JArray)responseObject["response"]["messages"];
-
-            CurrentGroupMessages = GetMessagesFromJson(messagesArray);
-            MessagesListBox.Items.Clear();
-            List<Message> reversedGroupMessages = CurrentGroupMessages;
-            reversedGroupMessages.Reverse();
-
-            foreach (Message m in reversedGroupMessages)
+        private void ShowMessages(string groupId)
+        {
+            Group group = User.CurrentUser.Groups.First(x => x.GroupId == groupId);
+            foreach (Message message in group.Messages)
             {
                 ListBoxItem lbi = new ListBoxItem()
                 {
-                    Content = m.Text + "\n- (" + m.Name + ")"
+                    Content = message.Text
                 };
                 MessagesListBox.Items.Add(lbi);
             }
-            if (MessagesListBox.Items.Count > 0)
-            {
-                MessagesListBox.ScrollIntoView(MessagesListBox.Items[MessagesListBox.Items.Count - 1]);
-            }
-
-
-            //return messagesArray;
-            //{
-            //  "id": "138034088713787624",
-            //  "source_guid": "79708b4b-21fd-47e2-bfa4-d62f0b30dd76",
-            //  "created_at": 1380340887,
-            //  "user_id": "11899441",
-            //  "group_id": "5630912",
-            //  "name": "Anthony Kazyaka",
-            //  "avatar_url": "http://i.groupme.com/9699a540e19d0130f8d86ae2556dddb3",
-            //  "text": "Joe is the fucking man!",
-            //  "system": false,
-            //  "attachments": [],
-            //  "favorited_by": []
-            //}
+            
+            MessagesListBox.ScrollIntoView(MessagesListBox.Items[0]);
         }
 
-        private List<Message> GetMessagesFromJson(JArray messageArray)
+        private async Task<bool> GetGroupMessages(string groupId)
         {
-            List<Message> messageList = new List<Message>();
-            foreach (JObject jsonObject in messageArray)
+            Group group = User.CurrentUser.Groups.First(x => x.GroupId == groupId);
+            if (group.Messages != null)
             {
-                Message message = new Message()
-                {
-                    Id = (string) jsonObject["id"],
-                    CreatedAt = (long) jsonObject["created_at"],
-                    UserId = (string) jsonObject["user_id"],
-                    GroupId = (string) jsonObject["group_id"],
-                    Name = (string) jsonObject["name"],
-                    AvatarUrl = (string) jsonObject["avatar_url"],
-                    Text = (string) jsonObject["text"],
-                    System = (bool) jsonObject["system"]
-                };
-                messageList.Add(message);
+                return true;
             }
-            return messageList;
+            User.CurrentUser.Groups.First(x => x.GroupId == groupId).Messages = await Group.GetGroupMessages(groupId);
+            return true;
         }
+
 
         private void SubmitButton_OnClick(object sender, RoutedEventArgs e)
         {
-            PostMessageToGroup(CurrentGroupId, MessageTextBox.Text);
-        }
-
-        private async void PostMessageToGroup(string groupId, string message)
-        {
-            HttpWebRequest request =
-                WebRequest.Create(GroupMeSettings.BaseGroupMeUrl + "/groups/" + groupId + "/messages?token=" + GroupMeSettings.AccessToken) as HttpWebRequest;
-            request.Method = "POST";
-            request.ContentType = "application/json; charset=utf-8";
-            Stream reqStream = await request.GetRequestStreamAsync();
-
-            string requestString = "{\"message\": {\"text\": \"" + message + "\"} }";
-            byte[] byteArray = Encoding.UTF8.GetBytes(requestString);
-            reqStream.Write(byteArray, 0, byteArray.Length);
-            HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-                string responseString = reader.ReadToEnd();
-            }
+            Group.PostMessageToGroupAsync(CurrentGroupId, MessageTextBox.Text);
         }
     }
 }
