@@ -21,8 +21,8 @@ namespace DockChat
 
         public Group Group { get; set; }
 
-        private Message _lastMessageInGroup {get { return Group.Messages.Last(); }}
-        public string LastMessageDisplayText {get { return _lastMessageInGroup.Name + ": " + _lastMessageInGroup.Text; } }
+        private Message _lastMessageInGroup {get { return (Group.Messages.Any()) ? Group.Messages.Last() : new Message(); }}
+        public string LastMessageDisplayText {get { return (!String.IsNullOrWhiteSpace(_lastMessageInGroup.Text)) ? _lastMessageInGroup.Name + ": " + _lastMessageInGroup.Text : ""; } }
 
         public string ImageUrl {get { return Group.ImageUrl; }}
         public string Description {get { return Group.Description; }}

@@ -74,7 +74,7 @@
         	</Grid>
         	<Grid x:Name="RightHalfGrid" HorizontalAlignment="Left" Height="583" Margin="500,25,0,0" VerticalAlignment="Top" Width="812">
 				<Grid x:Name="GroupMemberGrid" Margin="0,0,0,458" Height="125">
-                    <ListBox x:Name="GroupMembersListBox" ScrollViewer.HorizontalScrollMode="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <ListBox x:Name="GroupMembersListBox" ScrollViewer.HorizontalScrollMode="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" Margin="0,0,136,0">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal"></StackPanel>
@@ -84,7 +84,7 @@
                 </Grid>
         		<Grid x:Name="MessageGrid" HorizontalAlignment="Left" Height="452" VerticalAlignment="Bottom" Width="812">
         			<ListBox x:Name="MessagesListBox" Margin="0,5,0,108"/>
-        			<TextBox x:Name="MessageTextBox" HorizontalAlignment="Left" Height="95" Margin="2,350,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="702"/>
+        			<TextBox x:Name="MessageTextBox" HorizontalAlignment="Left" Height="95" Margin="2,350,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="702" KeyUp="MessageTextBox_OnKeyUp"/>
         			<Button x:Name="SubmitButton" Content="Send!" HorizontalAlignment="Left" Height="101" Margin="704,347,-1,0" VerticalAlignment="Top" Width="109" Click="SubmitButton_OnClick"/>
         		</Grid>
             </Grid>

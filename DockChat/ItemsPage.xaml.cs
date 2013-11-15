@@ -1,10 +1,11 @@
 ﻿using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Input;
 using Windows.Security.Authentication.OnlineId;
+using Windows.System;
 using Windows.UI;
 using DockChat.Data;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 // The Items Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234233
 using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace DockChat
 {
@@ -34,10 +36,14 @@ namespace DockChat
 
         public string CurrentGroupId { get; set; }
         public List<Message> CurrentGroupMessages { get; set; }
+        private DispatcherTimer _timer = new DispatcherTimer();
 
         public ItemsPage()
         {
             this.InitializeComponent();
+            _timer.Interval = new TimeSpan(0, 0, 5);
+            _timer.Tick += Timer_Tick;
+            _timer.Start();
         }
 
         /// <summary>
@@ -63,6 +69,8 @@ namespace DockChat
                 gdb.Tapped += GroupListBoxItem_Clicked;
                 GroupListBox.Items.Add(gdb);
             }
+            CurrentGroupId = User.CurrentUser.Groups.First().GroupId;
+            UpdateGroupsAndDisplayMessages();
             // this.DefaultViewModel["Items"] = userGroupsArray;
         }
 
@@ -84,6 +92,19 @@ namespace DockChat
         {
             Group group = (sender as GroupDisplayBox).Group;
             GetAndDisplayGroupMessages(group);
+        }
+
+        private async void UpdateGroups()
+        {
+            User.CurrentUser.Groups = await Group.GetGroups();
+
+            foreach (Group group in User.CurrentUser.Groups)
+            {
+                GroupDisplayBox gdb = new GroupDisplayBox(group);
+                group.Messages = await Group.GetGroupMessages(group.Id);
+                gdb.Tapped += GroupListBoxItem_Clicked;
+                GroupListBox.Items.Add(gdb);
+            }
         }
 
         private async void GetAndDisplayGroupMessages(Group group)
@@ -123,9 +144,37 @@ namespace DockChat
             SendMessageToGroup();
         }
 
+        private void MessageTextBox_OnKeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Enter)
+            {
+                SendMessageToGroup();
+            }
+        }
+
+        private async void Timer_Tick(object sender, object o)
+        {
+            UpdateGroupsAndDisplayMessages();
+        }
+
+        private void UpdateGroupsAndDisplayMessages()
+        {
+            UpdateGroups();
+            GetAndDisplayGroupMessages(User.CurrentUser.Groups.First(x => x.GroupId == CurrentGroupId));
+        }
+        
         private void SendMessageToGroup()
         {
-            Group.PostMessageToGroupAsync(CurrentGroupId, MessageTextBox.Text);            
+            if(!String.IsNullOrWhiteSpace(MessageTextBox.Text))
+                Group.PostMessageToGroupAsync(CurrentGroupId, MessageTextBox.Text);
+       
+            ClearMessageFromTextBox();
+            UpdateGroupsAndDisplayMessages();
+        }
+
+        private void ClearMessageFromTextBox()
+        {
+            MessageTextBox.Text = "";
         }
 
         private void DisplayGroupMembers(Group group)
@@ -137,6 +186,12 @@ namespace DockChat
             }
         }
 
+        private void ClearGroupsListBox()
+        {
+            if(GroupListBox.Items.Any())
+                GroupListBox.Items.Clear();
+        }
+
         private void ClearMessagesListBox()
         {
             MessagesListBox.Items.Clear();
@@ -146,5 +201,7 @@ namespace DockChat
         {
             GroupMembersListBox.Items.Clear();
         }
+
+
     }
 }
