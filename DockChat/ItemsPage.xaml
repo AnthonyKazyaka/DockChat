@@ -74,13 +74,14 @@
         	</Grid>
         	<Grid x:Name="RightHalfGrid" HorizontalAlignment="Left" Height="583" Margin="500,25,0,0" VerticalAlignment="Top" Width="812">
 				<Grid x:Name="GroupMemberGrid" Margin="0,0,0,458" Height="125">
-                    <ListBox x:Name="GroupMembersListBox" ScrollViewer.HorizontalScrollMode="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" Margin="0,0,136,0">
+                    <ListBox x:Name="GroupMembersListBox" ScrollViewer.HorizontalScrollMode="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" Margin="0,0,71,0">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal"></StackPanel>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                     </ListBox>
+                    <Button x:Name="AddGroupMemberButton" Content="+" HorizontalAlignment="Left" Height="42" Margin="756,41,0,0" VerticalAlignment="Top" Width="46" Click="SubmitButton_OnClick"/>
                 </Grid>
         		<Grid x:Name="MessageGrid" HorizontalAlignment="Left" Height="452" VerticalAlignment="Bottom" Width="812">
         			<ListBox x:Name="MessagesListBox" Margin="0,5,0,108"/>
