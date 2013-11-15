@@ -106,12 +106,21 @@
     <Compile Include="Bot.cs" />
     <Compile Include="DirectMessage.cs" />
     <Compile Include="Group.cs" />
+    <Compile Include="GroupDisplayBox.xaml.cs">
+      <DependentUpon>GroupDisplayBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GroupMemberDisplay.xaml.cs">
+      <DependentUpon>GroupMemberDisplay.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GroupMeSettings.cs" />
     <Compile Include="ItemsPage.xaml.cs">
       <DependentUpon>ItemsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Member.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="MessageTextBox.xaml.cs">
+      <DependentUpon>MessageTextBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SplitPage.xaml.cs">
       <DependentUpon>SplitPage.xaml</DependentUpon>
     </Compile>
@@ -151,9 +160,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="GroupDisplayBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GroupMemberDisplay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ItemsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MessageTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SplitPage.xaml">
       <Generator>MSBuild:Compile</Generator>

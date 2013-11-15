@@ -1,0 +1,20 @@
+﻿<UserControl
+    x:Class="DockChat.GroupDisplayBox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DockChat"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="75"
+    d:DesignWidth="400"
+    x:Name="GroupInfoDisplayBox">
+
+    <Grid>
+        <Grid HorizontalAlignment="Left">
+            <Image Name="GroupAvatarImage" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="75" Height="75" Source="{Binding ElementName=GroupInfoDisplayBox, Path=ImageUrl}"></Image>
+        </Grid>
+        <TextBlock Name="GroupNameBlock" Margin="100,0,30,38" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding ElementName=GroupInfoDisplayBox, Path=GroupName}" Height="37"/>
+        <TextBlock Name="GroupLastMessageBlock" Margin="100,37,0,1" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding ElementName=GroupInfoDisplayBox, Path=LastMessageDisplayText}" Height="37"></TextBlock>
+    </Grid>
+</UserControl>

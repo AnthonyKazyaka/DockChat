@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.OnlineId;
+using Windows.UI;
 using DockChat.Data;
 
 using System;
@@ -57,13 +58,10 @@ namespace DockChat
 
             foreach (Group group in User.CurrentUser.Groups)
             {
-                ListBoxItem lbi = new ListBoxItem()
-                {
-                    Content = group.Name,
-                    Name = group.Id + ""
-                };
-                lbi.Tapped += GroupListBoxItem_Clicked;
-                GroupListBox.Items.Add(lbi);
+                GroupDisplayBox gdb = new GroupDisplayBox(group);
+                group.Messages = await Group.GetGroupMessages(group.Id);
+                gdb.Tapped += GroupListBoxItem_Clicked;
+                GroupListBox.Items.Add(gdb);
             }
             // this.DefaultViewModel["Items"] = userGroupsArray;
         }
@@ -84,47 +82,69 @@ namespace DockChat
 
         private void GroupListBoxItem_Clicked(object sender, RoutedEventArgs e)
         {
-            string groupId = (sender as ListBoxItem).Name;
-            GetAndDisplayGroupMessages(groupId);
+            Group group = (sender as GroupDisplayBox).Group;
+            GetAndDisplayGroupMessages(group);
         }
 
-        private async void GetAndDisplayGroupMessages(string groupId)
+        private async void GetAndDisplayGroupMessages(Group group)
         {
-            CurrentGroupId = groupId;
-            await GetGroupMessages(groupId);
-            ShowMessages(groupId);
+            CurrentGroupId = group.Id;
+            await GetGroupMessages(group);
+            ClearMessagesListBox();
+            ShowMessages(group);
+            ClearGroupMembersList();
+            DisplayGroupMembers(group);
         }
 
-        private void ShowMessages(string groupId)
+        private void ShowMessages(Group group)
         {
-            Group group = User.CurrentUser.Groups.First(x => x.GroupId == groupId);
             foreach (Message message in group.Messages)
             {
-                ListBoxItem lbi = new ListBoxItem()
-                {
-                    Content = message.Text
-                };
-                MessagesListBox.Items.Add(lbi);
+                MessageTextBox mtb = new MessageTextBox(message, Color.FromArgb(255, 255, 0, 255));
+                MessagesListBox.Items.Add(mtb);
             }
             
-            MessagesListBox.ScrollIntoView(MessagesListBox.Items[0]);
+            MessagesListBox.ScrollIntoView(MessagesListBox.Items.LastOrDefault());
         }
 
-        private async Task<bool> GetGroupMessages(string groupId)
+        private async Task<bool> GetGroupMessages(Group group)
         {
-            Group group = User.CurrentUser.Groups.First(x => x.GroupId == groupId);
             if (group.Messages != null)
             {
                 return true;
             }
-            User.CurrentUser.Groups.First(x => x.GroupId == groupId).Messages = await Group.GetGroupMessages(groupId);
+            User.CurrentUser.Groups.First(x => x.GroupId == group.Id).Messages = await Group.GetGroupMessages(group);
             return true;
         }
 
 
         private void SubmitButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Group.PostMessageToGroupAsync(CurrentGroupId, MessageTextBox.Text);
+            SendMessageToGroup();
+        }
+
+        private void SendMessageToGroup()
+        {
+            Group.PostMessageToGroupAsync(CurrentGroupId, MessageTextBox.Text);            
+        }
+
+        private void DisplayGroupMembers(Group group)
+        {
+            foreach (Member member in group.Members)
+            {
+                GroupMemberDisplay display = new GroupMemberDisplay(member);
+                GroupMembersListBox.Items.Add(display);
+            }
+        }
+
+        private void ClearMessagesListBox()
+        {
+            MessagesListBox.Items.Clear();
+        }
+
+        private void ClearGroupMembersList()
+        {
+            GroupMembersListBox.Items.Clear();
         }
     }
 }

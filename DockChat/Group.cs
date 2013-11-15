@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Newtonsoft.Json.Linq;
@@ -53,6 +54,37 @@ namespace DockChat
             JObject responseObject = JObject.Parse(responseString);
             JArray userGroupsArray = (JArray)responseObject["response"];
             return GetGroupsFromJson(userGroupsArray);
+        }
+
+        /// <summary>
+        /// Returns a list of messages ordered by date of creation
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        public static async Task<List<Message>> GetGroupMessages(Group group)
+        {
+            List<Message> messageList = new List<Message>();
+
+            HttpWebRequest request =
+                WebRequest.Create(GroupMeSettings.BaseGroupMeUrl + "/groups/" + group.Id + "/messages?token=" + GroupMeSettings.AccessToken) as HttpWebRequest;
+            request.Method = "GET";
+            request.ContentType = "application/json; charset=utf-8";
+
+            HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+
+            string responseString;
+            using (var reader = new StreamReader(response.GetResponseStream()))
+            {
+                responseString = reader.ReadToEnd();
+            }
+
+            JObject responseObject = JObject.Parse(responseString);
+            JArray messagesArray = (JArray)responseObject["response"]["messages"];
+
+            messageList = GetMessagesFromJson(messagesArray);
+            messageList.Reverse();
+
+            return messageList;
         }
 
         /// <summary>
