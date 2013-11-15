@@ -152,7 +152,7 @@ namespace DockChat
             }
         }
 
-        private async void Timer_Tick(object sender, object o)
+        private void Timer_Tick(object sender, object o)
         {
             UpdateGroupsAndDisplayMessages();
         }
