@@ -104,6 +104,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Bot.cs" />
+    <Compile Include="DirectMessageTextBox.xaml.cs">
+      <DependentUpon>DirectMessageTextBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DirectMessage.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="GroupDisplayBox.xaml.cs">
@@ -157,6 +160,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Common\StandardStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DirectMessageTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

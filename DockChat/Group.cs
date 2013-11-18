@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -36,24 +37,9 @@ namespace DockChat
 
         public List<Message> Messages { get; set; }
 
-        public static async Task<List<Group>> GetGroups()
+        public List<Message> GetGroupMessages()
         {
-            HttpWebRequest request =
-                WebRequest.Create(GroupMeSettings.BaseGroupMeUrl + "/groups?token=" + GroupMeSettings.AccessToken) as HttpWebRequest;
-            request.Method = "GET";
-            request.ContentType = "application/json; charset=utf-8";
-
-            HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
-
-            string responseString;
-            using (var reader = new StreamReader(response.GetResponseStream()))
-            {
-                responseString = reader.ReadToEnd();
-            }
-
-            JObject responseObject = JObject.Parse(responseString);
-            JArray userGroupsArray = (JArray)responseObject["response"];
-            return GetGroupsFromJson(userGroupsArray);
+            return Group.GetGroupMessages(this).Result;
         }
 
         /// <summary>
@@ -118,7 +104,7 @@ namespace DockChat
             return messageList;
         }
 
-        private static List<Group> GetGroupsFromJson(JArray groupsArray)
+        public static List<Group> GetGroupsFromJson(JArray groupsArray)
         {
             List<Group> groupList = new List<Group>();
             foreach (JObject jsonObject in groupsArray)
@@ -204,6 +190,37 @@ namespace DockChat
             {
                 string responseString = reader.ReadToEnd();
             }
+        }
+
+        public static async void AddMemberToGroup(string groupId, string name, string phoneNumber)
+        {
+            HttpWebRequest request =
+                WebRequest.Create(GroupMeSettings.BaseGroupMeUrl + "/groups/" + groupId + "/members/add?token=" + GroupMeSettings.AccessToken) as HttpWebRequest;
+            request.Method = "POST";
+            request.ContentType = "application/json; charset=utf-8";
+            Stream reqStream = await request.GetRequestStreamAsync();
+            string requestString = "{\"members\": [ {\"nickname\": \"" + name + "\"";
+            if (!String.IsNullOrWhiteSpace(phoneNumber))
+                requestString += ", \"phone_number\": \"" + phoneNumber + "\"";
+            requestString += "} ] }";
+            byte[] byteArray = Encoding.UTF8.GetBytes(requestString);
+            reqStream.Write(byteArray, 0, byteArray.Length);
+            HttpWebResponse response = await request.GetResponseAsync() as HttpWebResponse;
+
+            using (var reader = new StreamReader(response.GetResponseStream()))
+            {
+                string responseString = reader.ReadToEnd();
+            }
+        }
+
+        public void AddMember(string name, string phoneNumber)
+        {
+            AddMemberToGroup(GroupId, name, phoneNumber);
+        }
+
+        public static Group GetCurrentGroupFromId(string id)
+        {
+            return User.CurrentUser.Groups.FirstOrDefault(x => x.GroupId == id);
         }
     }
 }

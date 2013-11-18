@@ -60,7 +60,7 @@ namespace DockChat
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             // var sampleDataGroups = SampleDataSource.GetGroups((String)navigationParameter);
 
-            User.CurrentUser.Groups = await Group.GetGroups();
+            User.CurrentUser.Groups = await User.GetGroups();
 
             foreach (Group group in User.CurrentUser.Groups)
             {
@@ -96,8 +96,30 @@ namespace DockChat
 
         private async void UpdateGroups()
         {
-            User.CurrentUser.Groups = await Group.GetGroups();
+            List<Group> tempGroupList = await User.GetGroups();
 
+            bool matchesFound = false;
+
+            foreach (Group tempGroup in tempGroupList)
+            {
+                foreach (Group group in User.CurrentUser.Groups)
+                {
+                    if (tempGroup.GroupId == group.GroupId)
+                    {
+                        matchesFound = true;
+                        break;
+                    }
+                }
+                if (!matchesFound)
+                    break;
+            }
+
+            if (matchesFound)
+                return;
+
+            ClearGroupsListBox();
+            User.CurrentUser.Groups = tempGroupList;
+            
             foreach (Group group in User.CurrentUser.Groups)
             {
                 GroupDisplayBox gdb = new GroupDisplayBox(group);
@@ -134,7 +156,7 @@ namespace DockChat
             {
                 return true;
             }
-            User.CurrentUser.Groups.First(x => x.GroupId == group.Id).Messages = await Group.GetGroupMessages(group);
+            GetCurrentGroup().Messages = await Group.GetGroupMessages(group);
             return true;
         }
 
@@ -160,7 +182,7 @@ namespace DockChat
         private void UpdateGroupsAndDisplayMessages()
         {
             UpdateGroups();
-            GetAndDisplayGroupMessages(User.CurrentUser.Groups.First(x => x.GroupId == CurrentGroupId));
+            GetAndDisplayGroupMessages(GetCurrentGroup());
         }
         
         private void SendMessageToGroup()
@@ -203,5 +225,81 @@ namespace DockChat
         }
 
 
+        private void AddGroupMemberButton_OnClickButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            AddMemberGrid.Visibility = Visibility.Visible;
+        }
+
+        private void AddMemberGridButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(NameTextBox.Text))
+            {
+                AddMemberToGroup(NameTextBox.Text, NumberTextBox.Text);
+                MinimizeAddMemberGrid();
+                ClearAddMemberGridTextBoxes();
+            }
+        }
+
+        private void CancelAddMemberButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            ClearAddMemberGridTextBoxes();
+            MinimizeAddMemberGrid();
+        }
+
+        private void AddMemberToGroup(string name, string phoneNumber)
+        {
+            GetCurrentGroup().AddMember(name, phoneNumber);
+            UpdateGroupsAndDisplayMessages();
+        }
+
+        private void ClearAddMemberGridTextBoxes()
+        {
+            NameTextBox.Text = "";
+            NumberTextBox.Text = "";
+        }
+
+        private void MinimizeAddMemberGrid()
+        {
+            AddMemberGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private Group GetCurrentGroup()
+        {
+            return Group.GetCurrentGroupFromId(CurrentGroupId);
+        }
+        private void AddGroupButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            AddGroupGrid.Visibility = Visibility.Visible;
+        }
+
+        private void AddGroupGridButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(AddGroupNameTextBox.Text))
+            {
+                User.AddGroupToUser(AddGroupNameTextBox.Text, GroupDescriptionTextBox.Text);
+                ClearAddGroupTextBoxes();
+                MinimizeAddGroupGrid();
+                UpdateGroupsAndDisplayMessages();
+            }
+        }
+
+        private void CancelAddGroupButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            ClearAddMemberGridTextBoxes();
+            MinimizeAddGroupGrid();
+        }
+
+        private void MinimizeAddGroupGrid()
+        {
+            AddGroupGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void ClearAddGroupTextBoxes()
+        {
+            AddGroupNameTextBox.Text = "";
+            GroupDescriptionTextBox.Text = "";
+        }
+
+        
     }
 }

@@ -42,7 +42,7 @@
             SelectionMode="None"
             IsSwipeEnabled="false"
             IsItemClickEnabled="True"
-            ItemClick="ItemView_ItemClick" Margin="0,-4,0,4"/>
+            ItemClick="ItemView_ItemClick" Margin="0,-4,0,4" d:IsLocked="True"/>
 
         <!-- Vertical scrolling list only used when snapped -->
         <ListView
@@ -69,8 +69,17 @@
             <TextBlock x:Name="pageTitle" Grid.Column="1" Text="{StaticResource AppName}" IsHitTestVisible="false" Style="{StaticResource PageHeaderTextStyle}"/>
         </Grid>
         <Grid x:Name="ContentGrid" Margin="0,140,0,0" Grid.RowSpan="2">
-        	<Grid x:Name="GroupGrid" HorizontalAlignment="Left" Height="583" VerticalAlignment="Top" Width="400" Margin="52,20,0,-88">
-        		<ListBox x:Name="GroupListBox"/>
+        	<Grid x:Name="GroupGrid" HorizontalAlignment="Left" Height="569" VerticalAlignment="Top" Width="400" Margin="52,20,0,0">
+        		<ListBox x:Name="GroupListBox" Margin="0,0,0,57"/>
+        		<Button x:Name="AddGroupButton" Content="+" HorizontalAlignment="Left" Height="57" Margin="3,512,0,0" VerticalAlignment="Top" Width="397" Click="AddGroupButton_OnClick"/>
+        		<Grid x:Name="AddGroupGrid" Margin="10,304,10,82" Background="#FF949494" Visibility="Collapsed">
+        			<TextBlock x:Name="AddGroupNameTextBlock" HorizontalAlignment="Left" Height="21" Margin="10,16,0,0" TextWrapping="Wrap" Text="Group Name:" VerticalAlignment="Top" Width="109" FontSize="16" Foreground="Black"/>
+        			<TextBox x:Name="AddGroupNameTextBox" HorizontalAlignment="Left" Height="21" Margin="141,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="209"/>
+        			<Button x:Name="AddGroupGridButton" Content="Add!" HorizontalAlignment="Left" Margin="201,135,0,0" VerticalAlignment="Top" Background="Black" Click="AddGroupGridButton_OnClick"/>
+        			<Button x:Name="CancelAddGroupButton" Content="Cancel" HorizontalAlignment="Left" Margin="272,135,0,0" VerticalAlignment="Top" Background="Black" Click="CancelAddGroupButton_OnClick" />
+        			<TextBlock x:Name="GroupDescriptionTextBlock" HorizontalAlignment="Left" Height="21" Margin="10,53,0,0" TextWrapping="Wrap" Text="Description" VerticalAlignment="Top" Width="109" FontSize="16" Foreground="Black"/>
+        			<TextBox x:Name="GroupDescriptionTextBox" HorizontalAlignment="Left" Height="83" Margin="141,47,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="209"/>
+        		</Grid>
         	</Grid>
         	<Grid x:Name="RightHalfGrid" HorizontalAlignment="Left" Height="583" Margin="500,25,0,0" VerticalAlignment="Top" Width="812">
 				<Grid x:Name="GroupMemberGrid" Margin="0,0,0,458" Height="125">
@@ -81,15 +90,24 @@
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                     </ListBox>
-                    <Button x:Name="AddGroupMemberButton" Content="+" HorizontalAlignment="Left" Height="42" Margin="756,41,0,0" VerticalAlignment="Top" Width="46" Click="SubmitButton_OnClick"/>
+                    <Button x:Name="AddGroupMemberButton" Content="+" HorizontalAlignment="Left" Height="42" Margin="756,41,0,0" VerticalAlignment="Top" Width="46" Click="AddGroupMemberButton_OnClickButton_OnClick"/>
                 </Grid>
         		<Grid x:Name="MessageGrid" HorizontalAlignment="Left" Height="452" VerticalAlignment="Bottom" Width="812">
         			<ListBox x:Name="MessagesListBox" Margin="0,5,0,108"/>
         			<TextBox x:Name="MessageTextBox" HorizontalAlignment="Left" Height="95" Margin="2,350,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="702" KeyUp="MessageTextBox_OnKeyUp"/>
         			<Button x:Name="SubmitButton" Content="Send!" HorizontalAlignment="Left" Height="101" Margin="704,347,-1,0" VerticalAlignment="Top" Width="109" Click="SubmitButton_OnClick"/>
         		</Grid>
+        		<Grid x:Name="AddMemberGrid" Margin="372,10,94,379" Background="#FFA3A3A3" Visibility="Collapsed">
+        			<TextBlock x:Name="NameTextBlock" HorizontalAlignment="Left" Height="18" Margin="29,44,0,0" TextWrapping="Wrap" Text="Name:" VerticalAlignment="Top" Width="77" FontSize="16" Foreground="Black"/>
+        			<TextBlock x:Name="NumberTextBlock" HorizontalAlignment="Left" Height="18" Margin="29,79,0,0" TextWrapping="Wrap" Text="Number:" VerticalAlignment="Top" Width="77" FontSize="16" Foreground="Black"/>
+        			<TextBox x:Name="NameTextBox" HorizontalAlignment="Left" Height="28" Margin="106,34,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="193"/>
+        			<TextBox x:Name="NumberTextBox" HorizontalAlignment="Left" Height="28" Margin="106,71,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="193"/>
+        			<Button x:Name="AddMemberGridButton" Content="Add!" HorizontalAlignment="Left" Margin="173,137,0,0" VerticalAlignment="Top" Background="Black" Click="AddMemberGridButton_OnClick"/>
+        			<Button x:Name="CancelAddMemberButton" Content="Cancel" HorizontalAlignment="Left" Margin="239,137,0,0" VerticalAlignment="Top" Background="Black" Click="CancelAddMemberButton_OnClick"/>
+        		</Grid>
             </Grid>
         </Grid>
+        <Grid x:Name="DirectMessageGrid" HorizontalAlignment="Left" Height="331" Margin="495,156,0,0" Grid.Row="1" VerticalAlignment="Top" Width="622"/>
 
         <VisualStateManager.VisualStateGroups>
 
